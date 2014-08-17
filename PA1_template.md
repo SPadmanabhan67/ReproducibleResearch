@@ -14,7 +14,8 @@ Reproducible Research Assignment 1
 
 It returns a data frame in the end*
 
-```{r echo=TRUE}
+
+```r
 load <- function(filename) {
   # Just load the given activity file
 	f=read.csv(filename, header=TRUE)
@@ -37,21 +38,31 @@ load <- function(filename) {
 
 A Basic check on structure of the data frame:
 
-```{r echo=TRUE}
+
+```r
 f=load('activity.csv')
 ```
 
 Check the output of the data frame's structure:
-```{r echo=TRUE}
+
+```r
 str(f)
+```
+
+```
+## 'data.frame':	17568 obs. of  4 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ day     : Factor w/ 2 levels "Weekday","Weekend": 1 1 1 1 1 1 1 1 1 1 ...
 ```
 
 For now, we **ignore** missing values in the data set
 
 The following function takes the raw data frame of the activities and returns a frame with daily sums of the steps taken.
 
-```{r echo=TRUE}
 
+```r
 getDailySteps <- function (dframe){
   # Get daily steps total removing NAs from original data
 	# Note: if the Dataframe is already clean, na.rm=TRUE doesnt hurt
@@ -61,30 +72,31 @@ getDailySteps <- function (dframe){
 	# Now you have a dataframe showing total daily steps by Date
 	return(dailySums)
 }
-
 ```
 
 Using the above mentioned getDailySteps function, the following R function plots the daily steps:
 
-```{r echo=TRUE}
 
+```r
 plotHistogram <- function (dframe) {
   df=getDailySteps(dframe)
 	hist(df$steps, breaks=ceiling(max(df$steps)/1000), main="Histogram of Steps taken daily", xlab='Total Steps taken Per day', ylab='Frequency')
 }
-
 ```
 
 The *Output* of Daily steps Histogram:
 
-```{r echo=TRUE}
+
+```r
 plotHistogram(f)
 ```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+
 Lets define a couple of functions for mean and mean total number of steps taken per day
 
-```{r echo=TRUE}
 
+```r
 getMean <- function(dframe) {
   return (mean(getDailySteps(dframe)$steps))
 }
@@ -92,16 +104,25 @@ getMean <- function(dframe) {
 getMedian <- function(dframe) {
 	return (median(getDailySteps(dframe)$steps))
 }
-
 ```
 
 The output of mean and median using the above functions are given below:
 
-```{r echo=TRUE}
 
+```r
 getMean(f)
-getMedian(f)
+```
 
+```
+## [1] 9354
+```
+
+```r
+getMedian(f)
+```
+
+```
+## [1] 10395
 ```
 
 **What is the average daily activity pattern?**
@@ -110,21 +131,23 @@ Let's make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis
 
 Note that while computing the average number of steps on a given 5 minute interval, we ingnore NAs
 
-```{r echo=TRUE}
 
+```r
 dailyActivityPattern <- function(f) {
   av= aggregate(f$steps, FUN=mean, by=list(f$interval), data=f, na.rm=TRUE)
   names(av) = c('Interval','Steps')
   plot(av$Interval, av$Steps, col="blue", type="l", xlab='5 Minute Interval', ylab='Average Number of Steps', main='Daily Activity')    
 }
-
 ```
 
 The output is shown below:
 
-```{r echo=TRUE}
+
+```r
 dailyActivityPattern(f)
 ```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
 
 From the chart, it appears the the activity peaks between 8 and 9 am in the morning.
 This analysis above so far includes NAs. 
@@ -134,13 +157,19 @@ This analysis above so far includes NAs.
 Lets clean up the NAs and analyze the data.
 Number of rows in the data frame with steps showing up as NA can be found by 
 
-```{r echo=TRUE}
+
+```r
 nrow(f[is.na(f$steps),])
+```
+
+```
+## [1] 2304
 ```
 
 Lets use mean of the steps for those periods without missing values to replace the NAs for simplicity
 
-```{r echo=TRUE}
+
+```r
 getCleanFrame <- function (dframe) {
   # Use average of those without NAs for those with NAs
 	m = mean(dframe$steps, na.rm=TRUE)
@@ -149,28 +178,41 @@ getCleanFrame <- function (dframe) {
 	dframe[which(is.na(dframe$steps)),]$steps = m
 	return (dframe)
 }
-
 ```
 
 Replacing the older frame with a clean one
 
-```{r echo=TRUE}
+
+```r
 cleandata = getCleanFrame(f)
 ```
 
 Now, lets try plotting the Histogram on the clean frame
 
-```{r echo=TRUE}
+
+```r
 dailyActivityPattern(cleandata)
 ```
 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 
+
 Lets compute the mean and median of the Cleaned up data frame
 
-```{r echo=TRUE}
 
+```r
 getMean(cleandata)
-getMedian(cleandata)
+```
 
+```
+## [1] 10766
+```
+
+```r
+getMedian(cleandata)
+```
+
+```
+## [1] 10766
 ```
 
 Clearly the mean has shifted by the clean up while the median remains unchanged.
@@ -184,8 +226,8 @@ Below is a plot function that does the following:
 2. Does an aggregation by peiod of the day on each
 3. plots them in a 2x1 panel
 
-```{r echo=TRUE}
 
+```r
 plotCharts <- function (f) {
 
     par (mfrow=c(2,1))
@@ -199,14 +241,16 @@ plotCharts <- function (f) {
     plot(wei$Interval, wei$Steps, col="blue", type="l", xlab='Interval', ylab='Steps', main='Weekend')    
     
 }
-
 ```
 
 The *output* of executing the above function is given below:
 
-```{r echo=TRUE}
+
+```r
 plotCharts(cleandata)
 ```
+
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17.png) 
 
 Clearly, compared to weekdays, folks are a bit more active in the weekend afternoons. One way to look at it is whoever this was measured on was in general not that active during weekday afternoons but seems to be relatively more active on the weekend. He/she peaks typically at around 8:35 am on activity. However, after a friday night hangover, there is a slight shift in the activity pickup time. But, once a pattern similar to a typical morning warming up period is complete, on a weekend, the activities are more than during weekdays. I imagine he/she is doing a relatively sendantary office job during the weekdays.
 
